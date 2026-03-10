@@ -3,188 +3,235 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>獎勵計劃 - Reward Share</title>
+    <title>Sensory Physics Canvas</title>
     <style>
         :root {
-            --bg-color: #fdf4ff;
-            --card-bg: #ffffff;
-            --text-main: #4a044e;
-            --accent: #d946ef;
-            --gold: #fbbf24;
+            --bg-color: #0f172a;
         }
 
         body {
-            font-family: system-ui, -apple-system, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
             margin: 0;
-            padding: 20px;
-            box-sizing: border-box;
-        }
-
-        .reward-card {
-            background: var(--card-bg);
-            padding: 40px 30px;
-            border-radius: 28px;
-            box-shadow: 0 20px 40px rgba(217, 70, 239, 0.15);
-            text-align: center;
-            max-width: 350px;
-            width: 100%;
-            position: relative;
             overflow: hidden;
-            border: 2px solid rgba(217, 70, 239, 0.1);
+            background-color: var(--bg-color);
+            font-family: system-ui, -apple-system, sans-serif;
+            touch-action: none; /* Prevents scrolling when dragging on mobile */
         }
 
-        /* Decorative background element */
-        .reward-card::before {
-            content: '';
+        canvas {
+            display: block;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        .overlay {
             position: absolute;
-            top: -50px;
-            left: -50px;
-            width: 150px;
-            height: 150px;
-            background: linear-gradient(135deg, rgba(251, 191, 36, 0.2), transparent);
-            border-radius: 50%;
-            z-index: 0;
-        }
-
-        .icon-container {
-            font-size: 4rem;
-            margin-bottom: 10px;
-            position: relative;
-            z-index: 1;
-            text-shadow: 0 10px 20px rgba(251, 191, 36, 0.4);
-            animation: bounce 2s infinite ease-in-out;
-        }
-
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
+            top: 20px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.5);
+            pointer-events: none;
+            z-index: 10;
         }
 
         h1 {
-            font-size: 1.8rem;
-            margin: 10px 0;
-            position: relative;
-            z-index: 1;
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 400;
+            letter-spacing: 2px;
         }
-
-        .student-name {
-            font-size: 1.4rem;
-            font-weight: bold;
-            color: var(--accent);
-            margin: 5px 0 15px 0;
-            position: relative;
-            z-index: 1;
-        }
-
-        .achievement-text {
-            font-size: 1.1rem;
-            color: #701a75;
-            line-height: 1.5;
-            margin-bottom: 30px;
-            position: relative;
-            z-index: 1;
-        }
-
-        .share-btn {
-            background: linear-gradient(135deg, var(--accent), #c026d3);
-            color: white;
-            border: none;
-            border-radius: 50px;
-            padding: 16px 32px;
-            font-size: 1.1rem;
-            font-weight: bold;
-            cursor: pointer;
-            width: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            box-shadow: 0 10px 20px rgba(192, 38, 211, 0.3);
-            transition: transform 0.2s, box-shadow 0.2s;
-            position: relative;
-            z-index: 1;
-        }
-
-        .share-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 25px rgba(192, 38, 211, 0.4);
-        }
-
-        .share-btn:active {
-            transform: translateY(1px);
-        }
-
-        .fallback-msg {
-            margin-top: 15px;
+        
+        p {
+            margin: 5px 0 0 0;
             font-size: 0.9rem;
-            color: #94a3b8;
-            display: none;
+        }
+
+        #clearBtn {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 12px 24px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 30px;
+            cursor: pointer;
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            font-size: 1rem;
+            transition: background 0.2s;
+            pointer-events: auto;
+        }
+
+        #clearBtn:hover {
+            background: rgba(255, 255, 255, 0.2);
         }
     </style>
 </head>
 <body>
 
-    <div class="reward-card" id="captureArea">
-        <div class="icon-container">🏆</div>
-        <h1>獎勵計劃</h1>
-        <div class="student-name">Amazing Job!</div>
-        <div class="achievement-text">
-            Successfully completed the "Taking Turns" social communication activity today.
-        </div>
-        
-        <button class="share-btn" id="shareBtn">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="18" cy="5" r="3"></circle>
-                <circle cx="6" cy="12" r="3"></circle>
-                <circle cx="18" cy="19" r="3"></circle>
-                <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
-                <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
-            </svg>
-            Share with Parents
-        </button>
-        <div class="fallback-msg" id="fallbackMsg">Link copied to clipboard!</div>
+    <div class="overlay">
+        <h1>Sensory Bubbles</h1>
+        <p>Touch and drag to create. Swipe to push.</p>
     </div>
 
+    <button id="clearBtn">Clear Canvas</button>
+
+    <canvas id="physicsCanvas"></canvas>
+
     <script>
-        const shareBtn = document.getElementById('shareBtn');
-        const fallbackMsg = document.getElementById('fallbackMsg');
+        const canvas = document.getElementById('physicsCanvas');
+        const ctx = canvas.getContext('2d');
+        const clearBtn = document.getElementById('clearBtn');
 
-        // The data we want to send to the parent
-        const shareData = {
-            title: '獎勵計劃 Update',
-            text: 'Amazing Job! Successfully completed the "Taking Turns" social communication activity today. 🏆',
-            // url: 'https://your-school-portal.edu/student-progress' // Optional: Link to a portal
-        };
+        // Resize canvas to fill window
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
 
-        shareBtn.addEventListener('click', async () => {
-            // Check if the native Web Share API is supported by the browser/device
-            if (navigator.share) {
-                try {
-                    await navigator.share(shareData);
-                    console.log('Successfully shared');
-                } catch (err) {
-                    console.log('Error sharing or user cancelled:', err);
+        // Physics variables
+        const gravity = 0.4;
+        const friction = 0.8;
+        const bounce = 0.6;
+        let balls = [];
+        
+        // Soft, calming color palette
+        const colors = ['#38bdf8', '#818cf8', '#a78bfa', '#f472b6', '#fbbf24', '#34d399'];
+
+        class Ball {
+            constructor(x, y, vx, vy, radius, color) {
+                this.x = x;
+                this.y = y;
+                this.vx = vx;
+                this.vy = vy;
+                this.radius = radius;
+                this.color = color;
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+                ctx.closePath();
+            }
+
+            update() {
+                // Apply gravity
+                this.vy += gravity;
+
+                // Move ball
+                this.x += this.vx;
+                this.y += this.vy;
+
+                // Floor collision
+                if (this.y + this.radius >= canvas.height) {
+                    this.y = canvas.height - this.radius;
+                    this.vy = -this.vy * bounce;
+                    this.vx *= friction; // Friction applies when hitting the ground
                 }
-            } else {
-                // Fallback for older browsers: Copy text to clipboard instead
-                try {
-                    await navigator.clipboard.writeText(`${shareData.title}\n${shareData.text}`);
-                    fallbackMsg.style.display = 'block';
-                    setTimeout(() => {
-                        fallbackMsg.style.display = 'none';
-                    }, 3000);
-                } catch (err) {
-                    console.error('Failed to copy text: ', err);
+
+                // Wall collisions
+                if (this.x + this.radius >= canvas.width) {
+                    this.x = canvas.width - this.radius;
+                    this.vx = -this.vx * bounce;
+                } else if (this.x - this.radius <= 0) {
+                    this.x = this.radius;
+                    this.vx = -this.vx * bounce;
+                }
+
+                this.draw();
+            }
+        }
+
+        // Interaction logic (Mouse & Touch)
+        let isPointerDown = false;
+        let lastPointer = { x: 0, y: 0 };
+
+        function handlePointerDown(e) {
+            isPointerDown = true;
+            updatePointerPos(e);
+            spawnBalls(lastPointer.x, lastPointer.y, 3);
+        }
+
+        function handlePointerMove(e) {
+            if (!isPointerDown) return;
+            
+            const currentX = e.clientX || (e.touches && e.touches[0].clientX);
+            const currentY = e.clientY || (e.touches && e.touches[0].clientY);
+            
+            // Calculate velocity based on drag speed
+            const dx = currentX - lastPointer.x;
+            const dy = currentY - lastPointer.y;
+            
+            // Push existing balls if we drag over them
+            for (let ball of balls) {
+                const dist = Math.hypot(ball.x - currentX, ball.y - currentY);
+                if (dist < ball.radius + 40) {
+                    ball.vx += dx * 0.1;
+                    ball.vy += dy * 0.1;
                 }
             }
+
+            spawnBalls(currentX, currentY, 1);
+            updatePointerPos(e);
+        }
+
+        function handlePointerUp() {
+            isPointerDown = false;
+        }
+
+        function updatePointerPos(e) {
+            lastPointer.x = e.clientX || (e.touches && e.touches[0].clientX);
+            lastPointer.y = e.clientY || (e.touches && e.touches[0].clientY);
+        }
+
+        function spawnBalls(x, y, count) {
+            // Prevent spawning too many to maintain performance
+            if (balls.length > 400) {
+                balls.splice(0, count); // remove oldest
+            }
+
+            for (let i = 0; i < count; i++) {
+                const radius = Math.random() * 15 + 10;
+                const color = colors[Math.floor(Math.random() * colors.length)];
+                // Give them a slight random burst velocity
+                const vx = (Math.random() - 0.5) * 10;
+                const vy = (Math.random() - 0.5) * 10;
+                balls.push(new Ball(x, y, vx, vy, radius, color));
+            }
+        }
+
+        // Event Listeners
+        canvas.addEventListener('mousedown', handlePointerDown);
+        window.addEventListener('mousemove', handlePointerMove);
+        window.addEventListener('mouseup', handlePointerUp);
+
+        canvas.addEventListener('touchstart', handlePointerDown, {passive: false});
+        window.addEventListener('touchmove', handlePointerMove, {passive: false});
+        window.addEventListener('touchend', handlePointerUp);
+
+        clearBtn.addEventListener('click', () => {
+            balls = [];
         });
+
+        // Animation Loop
+        function animate() {
+            requestAnimationFrame(animate);
+            // Slightly transparent clear creates a motion blur effect
+            ctx.fillStyle = 'rgba(15, 23, 42, 0.3)'; 
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            for (let i = 0; i < balls.length; i++) {
+                balls[i].update();
+            }
+        }
+
+        animate();
     </script>
 </body>
 </html>
