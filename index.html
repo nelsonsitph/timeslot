@@ -3,211 +3,188 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mindful Balance</title>
+    <title>獎勵計劃 - Reward Share</title>
     <style>
         :root {
-            --bg-color: #0f172a;
-            --ring-color: rgba(255, 255, 255, 0.1);
-            --ball-color: #38bdf8;
-            --success-color: #34d399;
+            --bg-color: #fdf4ff;
+            --card-bg: #ffffff;
+            --text-main: #4a044e;
+            --accent: #d946ef;
+            --gold: #fbbf24;
         }
 
         body {
-            margin: 0;
-            overflow: hidden;
             font-family: system-ui, -apple-system, sans-serif;
             background-color: var(--bg-color);
-            color: white;
+            color: var(--text-main);
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             height: 100vh;
-            touch-action: none; /* Prevents pull-to-refresh on mobile */
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
         }
 
-        .header {
-            position: absolute;
-            top: 10%;
+        .reward-card {
+            background: var(--card-bg);
+            padding: 40px 30px;
+            border-radius: 28px;
+            box-shadow: 0 20px 40px rgba(217, 70, 239, 0.15);
             text-align: center;
-            z-index: 10;
+            max-width: 350px;
+            width: 100%;
+            position: relative;
+            overflow: hidden;
+            border: 2px solid rgba(217, 70, 239, 0.1);
+        }
+
+        /* Decorative background element */
+        .reward-card::before {
+            content: '';
+            position: absolute;
+            top: -50px;
+            left: -50px;
+            width: 150px;
+            height: 150px;
+            background: linear-gradient(135deg, rgba(251, 191, 36, 0.2), transparent);
+            border-radius: 50%;
+            z-index: 0;
+        }
+
+        .icon-container {
+            font-size: 4rem;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+            text-shadow: 0 10px 20px rgba(251, 191, 36, 0.4);
+            animation: bounce 2s infinite ease-in-out;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
         }
 
         h1 {
             font-size: 1.8rem;
-            margin: 0 0 10px 0;
-            letter-spacing: 1px;
-        }
-
-        p {
-            color: #94a3b8;
-            margin: 0;
-            font-size: 1.1rem;
-        }
-
-        /* The play area */
-        .board {
-            width: 300px;
-            height: 300px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.03);
-            border: 2px solid var(--ring-color);
+            margin: 10px 0;
             position: relative;
+            z-index: 1;
+        }
+
+        .student-name {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: var(--accent);
+            margin: 5px 0 15px 0;
+            position: relative;
+            z-index: 1;
+        }
+
+        .achievement-text {
+            font-size: 1.1rem;
+            color: #701a75;
+            line-height: 1.5;
+            margin-bottom: 30px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .share-btn {
+            background: linear-gradient(135deg, var(--accent), #c026d3);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 16px 32px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: inset 0 0 50px rgba(0,0,0,0.5);
+            gap: 10px;
+            box-shadow: 0 10px 20px rgba(192, 38, 211, 0.3);
+            transition: transform 0.2s, box-shadow 0.2s;
+            position: relative;
+            z-index: 1;
         }
 
-        /* The center target */
-        .target {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            border: 3px dashed rgba(255, 255, 255, 0.3);
-            position: absolute;
-            transition: border-color 0.3s ease, background-color 0.3s ease;
+        .share-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 25px rgba(192, 38, 211, 0.4);
         }
 
-        /* The moving ball */
-        .ball {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background-color: var(--ball-color);
-            position: absolute;
-            box-shadow: 0 0 20px var(--ball-color);
-            /* Smooth interpolation so it doesn't jitter */
-            transition: transform 0.1s cubic-bezier(0.25, 1, 0.5, 1), background-color 0.3s ease;
-            will-change: transform;
+        .share-btn:active {
+            transform: translateY(1px);
         }
 
-        .start-btn {
-            position: absolute;
-            bottom: 15%;
-            padding: 16px 32px;
-            font-size: 1.2rem;
-            font-weight: bold;
-            border: none;
-            border-radius: 50px;
-            background: white;
-            color: var(--bg-color);
-            cursor: pointer;
-            box-shadow: 0 10px 25px rgba(255, 255, 255, 0.1);
-            transition: transform 0.2s ease;
-        }
-
-        .start-btn:active {
-            transform: scale(0.95);
-        }
-
-        /* Success animation */
-        .success-glow {
-            border-color: var(--success-color) !important;
-            background-color: rgba(52, 211, 153, 0.2);
-            box-shadow: 0 0 40px var(--success-color);
+        .fallback-msg {
+            margin-top: 15px;
+            font-size: 0.9rem;
+            color: #94a3b8;
+            display: none;
         }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <h1>Find Your Center</h1>
-        <p id="instructionText">Hold the device flat</p>
+    <div class="reward-card" id="captureArea">
+        <div class="icon-container">🏆</div>
+        <h1>獎勵計劃</h1>
+        <div class="student-name">Amazing Job!</div>
+        <div class="achievement-text">
+            Successfully completed the "Taking Turns" social communication activity today.
+        </div>
+        
+        <button class="share-btn" id="shareBtn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="18" cy="5" r="3"></circle>
+                <circle cx="6" cy="12" r="3"></circle>
+                <circle cx="18" cy="19" r="3"></circle>
+                <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+            </svg>
+            Share with Parents
+        </button>
+        <div class="fallback-msg" id="fallbackMsg">Link copied to clipboard!</div>
     </div>
-
-    <div class="board" id="board">
-        <div class="target" id="target"></div>
-        <div class="ball" id="ball"></div>
-    </div>
-
-    <button class="start-btn" id="startBtn">Start Balancing</button>
 
     <script>
-        const ball = document.getElementById('ball');
-        const target = document.getElementById('target');
-        const startBtn = document.getElementById('startBtn');
-        const instructionText = document.getElementById('instructionText');
-        
-        // Configuration for the board size
-        const maxMovement = 130; // Max pixels the ball can move from center
-        let timer = null;
-        let isSuccess = false;
+        const shareBtn = document.getElementById('shareBtn');
+        const fallbackMsg = document.getElementById('fallbackMsg');
 
-        startBtn.addEventListener('click', async () => {
-            // iOS 13+ requires explicit permission for device orientation
-            if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+        // The data we want to send to the parent
+        const shareData = {
+            title: '獎勵計劃 Update',
+            text: 'Amazing Job! Successfully completed the "Taking Turns" social communication activity today. 🏆',
+            // url: 'https://your-school-portal.edu/student-progress' // Optional: Link to a portal
+        };
+
+        shareBtn.addEventListener('click', async () => {
+            // Check if the native Web Share API is supported by the browser/device
+            if (navigator.share) {
                 try {
-                    const permissionState = await DeviceOrientationEvent.requestPermission();
-                    if (permissionState === 'granted') {
-                        startListening();
-                    } else {
-                        instructionText.innerText = "Permission denied. Cannot play.";
-                    }
-                } catch (error) {
-                    console.error(error);
+                    await navigator.share(shareData);
+                    console.log('Successfully shared');
+                } catch (err) {
+                    console.log('Error sharing or user cancelled:', err);
                 }
             } else {
-                // Non-iOS 13+ devices
-                startListening();
+                // Fallback for older browsers: Copy text to clipboard instead
+                try {
+                    await navigator.clipboard.writeText(`${shareData.title}\n${shareData.text}`);
+                    fallbackMsg.style.display = 'block';
+                    setTimeout(() => {
+                        fallbackMsg.style.display = 'none';
+                    }, 3000);
+                } catch (err) {
+                    console.error('Failed to copy text: ', err);
+                }
             }
         });
-
-        function startListening() {
-            startBtn.style.display = 'none';
-            instructionText.innerText = "Tilt to keep the blue dot inside the circle";
-            window.addEventListener('deviceorientation', handleOrientation);
-        }
-
-        function handleOrientation(event) {
-            if (isSuccess) return;
-
-            // Beta is front-to-back tilt in degrees (-180 to 180)
-            // Gamma is left-to-right tilt in degrees (-90 to 90)
-            let xTilt = event.gamma; 
-            let yTilt = event.beta;
-
-            // Constrain the tilt to a manageable range (e.g., -45 to 45 degrees)
-            if (xTilt > 45) xTilt = 45;
-            if (xTilt < -45) xTilt = -45;
-            if (yTilt > 45) yTilt = 45;
-            if (yTilt < -45) yTilt = -45;
-
-            // Map the tilt degrees to pixels on the screen
-            const xPos = (xTilt / 45) * maxMovement;
-            const yPos = (yTilt / 45) * maxMovement;
-
-            // Apply the movement using CSS transform for hardware acceleration
-            ball.style.transform = `translate(${xPos}px, ${yPos}px)`;
-
-            // Check if the ball is within the center target
-            // The target is 80px wide, so the ball (40px) is "inside" if it's within roughly 20px of center
-            const distanceFromCenter = Math.sqrt(xPos * xPos + yPos * yPos);
-
-            if (distanceFromCenter < 20) {
-                if (!timer) {
-                    // Start the 3-second hold timer
-                    target.style.borderColor = "var(--success-color)";
-                    instructionText.innerText = "Hold it steady...";
-                    
-                    timer = setTimeout(() => {
-                        isSuccess = true;
-                        ball.style.backgroundColor = "var(--success-color)";
-                        target.classList.add('success-glow');
-                        instructionText.innerText = "Great job! You are balanced.";
-                        window.removeEventListener('deviceorientation', handleOrientation);
-                    }, 3000);
-                }
-            } else {
-                // Reset if they slip out
-                if (timer) {
-                    clearTimeout(timer);
-                    timer = null;
-                    target.style.borderColor = "rgba(255, 255, 255, 0.3)";
-                    instructionText.innerText = "Tilt to keep the blue dot inside the circle";
-                }
-            }
-        }
     </script>
 </body>
 </html>
