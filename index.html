@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Magic Voice Reader</title>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --success: #22c55e;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            transition: background-color 0.5s ease;
+        }
+
+        .card {
+            background: var(--card-bg);
+            padding: 40px;
+            border-radius: 24px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .instruction {
+            font-size: 1.1rem;
+            color: #64748b;
+            margin-bottom: 10px;
+        }
+
+        .target-phrase {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--primary);
+            margin: 20px 0;
+            padding: 20px;
+            background: #e0e7ff;
+            border-radius: 16px;
+            letter-spacing: 1px;
+        }
+
+        .mic-btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 16px 32px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+            transition: transform 0.2s, background-color 0.2s;
+        }
+
+        .mic-btn:hover {
+            transform: translateY(-2px);
+            background-color: #4f46e5;
+        }
+
+        /* Pulse animation when listening */
+        .listening {
+            animation: pulse 1.5s infinite;
+            background-color: #ef4444 !important;
+            box-shadow: 0 0 20px rgba(239, 68, 68, 0.5) !important;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .feedback-text {
+            margin-top: 25px;
+            font-size: 1.2rem;
+            font-weight: 500;
+            min-height: 30px;
+            color: #475569;
+        }
+
+        /* Success State */
+        .success-state {
+            border-color: var(--success);
+            box-shadow: 0 0 30px rgba(34, 197, 94, 0.2);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card" id="mainCard">
+        <div class="instruction">Read the phrase out loud:</div>
+        
+        <div class="target-phrase" id="targetPhrase">I am calm</div>
+        
+        <button class="mic-btn" id="micBtn">
+            <span id="btnIcon">🎤</span> 
+            <span id="btnText">Tap to Speak</span>
+        </button>
+        
+        <div class="feedback-text" id="feedback"></div>
+    </div>
+
+    <script>
+        const micBtn = document.getElementById('micBtn');
+        const btnText = document.getElementById('btnText');
+        const feedback = document.getElementById('feedback');
+        const targetPhraseElement = document.getElementById('targetPhrase');
+        const mainCard = document.getElementById('mainCard');
+        
+        // The exact phrase we are listening for (case-insensitive in logic)
+        const expectedPhrase = "I am calm"; 
+
+        // 1. Initialize Speech Recognition (Vendor prefixes for cross-browser support)
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        
+        if (!SpeechRecognition) {
+            feedback.innerHTML = "Sorry, your browser doesn't support speech recognition. Try Chrome or Safari.";
+            micBtn.style.display = 'none';
+        } else {
+            const recognition = new SpeechRecognition();
+            recognition.lang = 'en-US'; // Can be changed to 'zh-HK' for Cantonese!
+            recognition.interimResults = false;
+            recognition.maxAlternatives = 1;
+
+            // 2. Initialize Speech Synthesis (Text-to-Speech)
+            const synth = window.speechSynthesis;
+
+            function speak(text) {
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.rate = 0.9; // Slightly slower, calming voice
+                utterance.pitch = 1.1;
+                synth.speak(utterance);
+            }
+
+            // --- Event Listeners ---
+
+            micBtn.addEventListener('click', () => {
+                recognition.start();
+            });
+
+            recognition.onstart = () => {
+                micBtn.classList.add('listening');
+                btnText.innerText = "Listening...";
+                feedback.innerText = "";
+                mainCard.classList.remove('success-state');
+            };
+
+            recognition.onspeechend = () => {
+                recognition.stop();
+                micBtn.classList.remove('listening');
+                btnText.innerText = "Tap to Speak";
+            };
+
+            recognition.onresult = (event) => {
+                // Get the transcribed text
+                const transcript = event.results[0][0].transcript.trim().toLowerCase();
+                
+                // Check if it matches our target phrase
+                // Removing punctuation for a cleaner match
+                const cleanTranscript = transcript.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"");
+                const cleanExpected = expectedPhrase.toLowerCase();
+
+                if (cleanTranscript === cleanExpected) {
+                    // Success!
+                    feedback.style.color = "var(--success)";
+                    feedback.innerText = `You said: "${transcript}". Great job!`;
+                    mainCard.classList.add('success-state');
+                    
+                    // The browser speaks back
+                    speak("Great job! You are calm.");
+                } else {
+                    // Try again
+                    feedback.style.color = "#ef4444";
+                    feedback.innerText = `You said: "${transcript}". Let's try again!`;
+                }
+            };
+
+            recognition.onerror = (event) => {
+                micBtn.classList.remove('listening');
+                btnText.innerText = "Tap to Speak";
+                feedback.innerText = "Didn't catch that. Please try again.";
+            };
+        }
+    </script>
+</body>
+</html>
