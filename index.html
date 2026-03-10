@@ -3,201 +3,210 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Magic Voice Reader</title>
+    <title>Mindful Balance</title>
     <style>
         :root {
-            --primary: #6366f1;
-            --success: #22c55e;
-            --bg-color: #f8fafc;
-            --card-bg: #ffffff;
-            --text-main: #1e293b;
+            --bg-color: #0f172a;
+            --ring-color: rgba(255, 255, 255, 0.1);
+            --ball-color: #38bdf8;
+            --success-color: #34d399;
         }
 
         body {
+            margin: 0;
+            overflow: hidden;
             font-family: system-ui, -apple-system, sans-serif;
             background-color: var(--bg-color);
-            color: var(--text-main);
+            color: white;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
+            justify-content: center;
             height: 100vh;
-            margin: 0;
-            transition: background-color 0.5s ease;
+            touch-action: none; /* Prevents pull-to-refresh on mobile */
         }
 
-        .card {
-            background: var(--card-bg);
-            padding: 40px;
-            border-radius: 24px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+        .header {
+            position: absolute;
+            top: 10%;
             text-align: center;
-            max-width: 400px;
-            width: 90%;
-            border: 2px solid transparent;
-            transition: all 0.3s ease;
+            z-index: 10;
         }
 
-        .instruction {
-            font-size: 1.1rem;
-            color: #64748b;
-            margin-bottom: 10px;
-        }
-
-        .target-phrase {
-            font-size: 2.5rem;
-            font-weight: 800;
-            color: var(--primary);
-            margin: 20px 0;
-            padding: 20px;
-            background: #e0e7ff;
-            border-radius: 16px;
+        h1 {
+            font-size: 1.8rem;
+            margin: 0 0 10px 0;
             letter-spacing: 1px;
         }
 
-        .mic-btn {
-            background-color: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 50px;
+        p {
+            color: #94a3b8;
+            margin: 0;
+            font-size: 1.1rem;
+        }
+
+        /* The play area */
+        .board {
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.03);
+            border: 2px solid var(--ring-color);
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: inset 0 0 50px rgba(0,0,0,0.5);
+        }
+
+        /* The center target */
+        .target {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 3px dashed rgba(255, 255, 255, 0.3);
+            position: absolute;
+            transition: border-color 0.3s ease, background-color 0.3s ease;
+        }
+
+        /* The moving ball */
+        .ball {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--ball-color);
+            position: absolute;
+            box-shadow: 0 0 20px var(--ball-color);
+            /* Smooth interpolation so it doesn't jitter */
+            transition: transform 0.1s cubic-bezier(0.25, 1, 0.5, 1), background-color 0.3s ease;
+            will-change: transform;
+        }
+
+        .start-btn {
+            position: absolute;
+            bottom: 15%;
             padding: 16px 32px;
             font-size: 1.2rem;
-            font-weight: 600;
+            font-weight: bold;
+            border: none;
+            border-radius: 50px;
+            background: white;
+            color: var(--bg-color);
             cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
-            transition: transform 0.2s, background-color 0.2s;
+            box-shadow: 0 10px 25px rgba(255, 255, 255, 0.1);
+            transition: transform 0.2s ease;
         }
 
-        .mic-btn:hover {
-            transform: translateY(-2px);
-            background-color: #4f46e5;
+        .start-btn:active {
+            transform: scale(0.95);
         }
 
-        /* Pulse animation when listening */
-        .listening {
-            animation: pulse 1.5s infinite;
-            background-color: #ef4444 !important;
-            box-shadow: 0 0 20px rgba(239, 68, 68, 0.5) !important;
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-        }
-
-        .feedback-text {
-            margin-top: 25px;
-            font-size: 1.2rem;
-            font-weight: 500;
-            min-height: 30px;
-            color: #475569;
-        }
-
-        /* Success State */
-        .success-state {
-            border-color: var(--success);
-            box-shadow: 0 0 30px rgba(34, 197, 94, 0.2);
+        /* Success animation */
+        .success-glow {
+            border-color: var(--success-color) !important;
+            background-color: rgba(52, 211, 153, 0.2);
+            box-shadow: 0 0 40px var(--success-color);
         }
     </style>
 </head>
 <body>
 
-    <div class="card" id="mainCard">
-        <div class="instruction">Read the phrase out loud:</div>
-        
-        <div class="target-phrase" id="targetPhrase">I am calm</div>
-        
-        <button class="mic-btn" id="micBtn">
-            <span id="btnIcon">🎤</span> 
-            <span id="btnText">Tap to Speak</span>
-        </button>
-        
-        <div class="feedback-text" id="feedback"></div>
+    <div class="header">
+        <h1>Find Your Center</h1>
+        <p id="instructionText">Hold the device flat</p>
     </div>
 
+    <div class="board" id="board">
+        <div class="target" id="target"></div>
+        <div class="ball" id="ball"></div>
+    </div>
+
+    <button class="start-btn" id="startBtn">Start Balancing</button>
+
     <script>
-        const micBtn = document.getElementById('micBtn');
-        const btnText = document.getElementById('btnText');
-        const feedback = document.getElementById('feedback');
-        const targetPhraseElement = document.getElementById('targetPhrase');
-        const mainCard = document.getElementById('mainCard');
+        const ball = document.getElementById('ball');
+        const target = document.getElementById('target');
+        const startBtn = document.getElementById('startBtn');
+        const instructionText = document.getElementById('instructionText');
         
-        // The exact phrase we are listening for (case-insensitive in logic)
-        const expectedPhrase = "I am calm"; 
+        // Configuration for the board size
+        const maxMovement = 130; // Max pixels the ball can move from center
+        let timer = null;
+        let isSuccess = false;
 
-        // 1. Initialize Speech Recognition (Vendor prefixes for cross-browser support)
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        
-        if (!SpeechRecognition) {
-            feedback.innerHTML = "Sorry, your browser doesn't support speech recognition. Try Chrome or Safari.";
-            micBtn.style.display = 'none';
-        } else {
-            const recognition = new SpeechRecognition();
-            recognition.lang = 'en-US'; // Can be changed to 'zh-HK' for Cantonese!
-            recognition.interimResults = false;
-            recognition.maxAlternatives = 1;
-
-            // 2. Initialize Speech Synthesis (Text-to-Speech)
-            const synth = window.speechSynthesis;
-
-            function speak(text) {
-                const utterance = new SpeechSynthesisUtterance(text);
-                utterance.rate = 0.9; // Slightly slower, calming voice
-                utterance.pitch = 1.1;
-                synth.speak(utterance);
-            }
-
-            // --- Event Listeners ---
-
-            micBtn.addEventListener('click', () => {
-                recognition.start();
-            });
-
-            recognition.onstart = () => {
-                micBtn.classList.add('listening');
-                btnText.innerText = "Listening...";
-                feedback.innerText = "";
-                mainCard.classList.remove('success-state');
-            };
-
-            recognition.onspeechend = () => {
-                recognition.stop();
-                micBtn.classList.remove('listening');
-                btnText.innerText = "Tap to Speak";
-            };
-
-            recognition.onresult = (event) => {
-                // Get the transcribed text
-                const transcript = event.results[0][0].transcript.trim().toLowerCase();
-                
-                // Check if it matches our target phrase
-                // Removing punctuation for a cleaner match
-                const cleanTranscript = transcript.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"");
-                const cleanExpected = expectedPhrase.toLowerCase();
-
-                if (cleanTranscript === cleanExpected) {
-                    // Success!
-                    feedback.style.color = "var(--success)";
-                    feedback.innerText = `You said: "${transcript}". Great job!`;
-                    mainCard.classList.add('success-state');
-                    
-                    // The browser speaks back
-                    speak("Great job! You are calm.");
-                } else {
-                    // Try again
-                    feedback.style.color = "#ef4444";
-                    feedback.innerText = `You said: "${transcript}". Let's try again!`;
+        startBtn.addEventListener('click', async () => {
+            // iOS 13+ requires explicit permission for device orientation
+            if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+                try {
+                    const permissionState = await DeviceOrientationEvent.requestPermission();
+                    if (permissionState === 'granted') {
+                        startListening();
+                    } else {
+                        instructionText.innerText = "Permission denied. Cannot play.";
+                    }
+                } catch (error) {
+                    console.error(error);
                 }
-            };
+            } else {
+                // Non-iOS 13+ devices
+                startListening();
+            }
+        });
 
-            recognition.onerror = (event) => {
-                micBtn.classList.remove('listening');
-                btnText.innerText = "Tap to Speak";
-                feedback.innerText = "Didn't catch that. Please try again.";
-            };
+        function startListening() {
+            startBtn.style.display = 'none';
+            instructionText.innerText = "Tilt to keep the blue dot inside the circle";
+            window.addEventListener('deviceorientation', handleOrientation);
+        }
+
+        function handleOrientation(event) {
+            if (isSuccess) return;
+
+            // Beta is front-to-back tilt in degrees (-180 to 180)
+            // Gamma is left-to-right tilt in degrees (-90 to 90)
+            let xTilt = event.gamma; 
+            let yTilt = event.beta;
+
+            // Constrain the tilt to a manageable range (e.g., -45 to 45 degrees)
+            if (xTilt > 45) xTilt = 45;
+            if (xTilt < -45) xTilt = -45;
+            if (yTilt > 45) yTilt = 45;
+            if (yTilt < -45) yTilt = -45;
+
+            // Map the tilt degrees to pixels on the screen
+            const xPos = (xTilt / 45) * maxMovement;
+            const yPos = (yTilt / 45) * maxMovement;
+
+            // Apply the movement using CSS transform for hardware acceleration
+            ball.style.transform = `translate(${xPos}px, ${yPos}px)`;
+
+            // Check if the ball is within the center target
+            // The target is 80px wide, so the ball (40px) is "inside" if it's within roughly 20px of center
+            const distanceFromCenter = Math.sqrt(xPos * xPos + yPos * yPos);
+
+            if (distanceFromCenter < 20) {
+                if (!timer) {
+                    // Start the 3-second hold timer
+                    target.style.borderColor = "var(--success-color)";
+                    instructionText.innerText = "Hold it steady...";
+                    
+                    timer = setTimeout(() => {
+                        isSuccess = true;
+                        ball.style.backgroundColor = "var(--success-color)";
+                        target.classList.add('success-glow');
+                        instructionText.innerText = "Great job! You are balanced.";
+                        window.removeEventListener('deviceorientation', handleOrientation);
+                    }, 3000);
+                }
+            } else {
+                // Reset if they slip out
+                if (timer) {
+                    clearTimeout(timer);
+                    timer = null;
+                    target.style.borderColor = "rgba(255, 255, 255, 0.3)";
+                    instructionText.innerText = "Tilt to keep the blue dot inside the circle";
+                }
+            }
         }
     </script>
 </body>
